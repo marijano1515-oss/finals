@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>ToDo List</title>
+<style>
+.todo-item{
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+  transition: all 0.2s ease;
+}
+.todo-item.completed{
+text-decoration:line-through;
+color:#888;
+background-color:#f1f1f1;
+}
+</style>
+</head>
+<body>
+     <h2>დღის სასარგებლო რჩევა</h2>
+<p id="adviceText">მიიღეთ სასარგებლო რჩევა</p>
+<button id="newAdviceBtn">რჩევის გენერაცია</button>
+     <h2>საქმეების სია</h2>
+<input type="text" id="todoInput" placeholder="დაამატე საქმე ...">
+<button id="addBtn">დამატება</button>
+<ul id="todoList"></ul>
+<script src="script.js"></script>
+</body>
+</html>
+const todoInput=document.getElementById('todoInput');
+const addBtn=document.getElementById('addBtn');
+const todoList=document.getElementById('todoList');
+const adviceText=document.getElementById('adviceText');
+const newAdviceBtn=document.getElementById('newAdviceBtn');
+
+async function getAdvice(){
+try{
+const resp=await fetch("https://api.adviceslip.com/advice");
+if(!resp.ok){
+throw new Error("არასწორი მონაცემები");
+}
+const data = await resp.json();
+
+adviceText.textContent=data.slip.advice;
+
+   }catch(error){
+console.log(error);
+   }
+
+}
+
+window.addEventListener('DOMContentLoaded',getAdvice);
+newAdviceBtn.addEventListener('click',getAdvice);
+
+function addTask(){
+const taskText=todoInput.value.trim();
+if(taskText===""){
+alert("ტექსტი ცარიელია");
+return;
+}
+const newList=document.createElement('li');
+const deleteBtn=document.createElement('span');
+ deleteBtn.textContent='    ->X';
+newList.classList.add('todo-item');
+newList.textContent=taskText;
+newList.appendChild(deleteBtn);
+newList.addEventListener('click',function(){
+newList.classList.toggle('completed');
+})
+
+
+ 
+ deleteBtn.addEventListener('click',function(ev){
+ev.stopPropagation();
+const c=confirm("ნამდვილად შლით?");
+if(c){
+newList.remove();
+}
+ });  
+
+
+todoInput.value="";
+
+
+todoList.appendChild(newList);
+
+}
+
+addBtn.addEventListener('click',addTask);
